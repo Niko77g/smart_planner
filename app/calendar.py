@@ -1,6 +1,4 @@
 import os
-import uuid
-from _pyrepl.commands import end
 from calendar import Calendar
 from datetime import datetime, timedelta, date, time
 from typing import Optional
@@ -46,19 +44,22 @@ class CalendarControl:
     def add_event(self, title,start: time,end: time, d: date) -> dict | None:
         if start >= end:
             raise Exception("start must be before end")
-        body = {"summary": title,"start":{"datetime": self._to_rfc3339(d,start), "timeZone": self.time_zone},
-                "end": {"datetime": self._to_rfc3339(d,end),"timeZone": self.time_zone}
+        body = {"summary": title,"start":{"dateTime": self._to_rfc3339(d,start), "timeZone": self.time_zone},
+                "end": {"dateTime": self._to_rfc3339(d,end),"timeZone": self.time_zone}
                 }
         return self.service.events().insert(calendarId=self.calendar_id, body=body).execute()
 
     def delete_event(self, event_id: str)-> None:
         self.service.events().delete(calendarId=self.calendar_id, eventId=event_id).execute()
     def list_events(self, d: Optional[date] = None):
-        params = {"calendarId": self.calendar_id, "singleEvents": True, "orderBy": "startTime"}
+        params = {"calendarId": self.calendar_id, "singleEvents": True, "orderBy": "startTime", "maxResults":50}
         if d:
             start_dt = datetime.combine(d, time(0,0)).replace(tzinfo=ZoneInfo(self.time_zone))
             end_dt = start_dt + timedelta(days=1)
             params.update({"timeMin":start_dt.isoformat(), "timeMax":end_dt.isoformat()})
+        else:
+            now = datetime.now(ZoneInfo(self.time_zone))
+            params["timeMin"] = now.isoformat()
         res = self.service.events().list(**params).execute()
         return res.get("items", [])
     def get_event(self, event_id: str):
@@ -67,12 +68,12 @@ class CalendarControl:
     def update_event(self, event_id: str, title: Optional[str] = None, start: Optional[time]=None, end: Optional[time]= None,d: Optional[date]= None) -> dict | None:
         event = self.get_event(event_id)
         if title:
-            event["title"] = title
+            event["summary"] = title
         if start and end and d:
             if start >= end:
                 raise Exception("start must be before end")
-            event["start"] = {"datetime": self._to_rfc3339(d,start), "timeZone": self.time_zone}
-            event["end"] = {"datetime": self._to_rfc3339(d,end), "timeZone": self.time_zone}
+            event["start"] = {"dateTime": self._to_rfc3339(d,start), "timeZone": self.time_zone}
+            event["end"] = {"dateTime": self._to_rfc3339(d,end), "timeZone": self.time_zone}
 
         return self.service.events().update(calendarId =self.calendar_id, eventId=event_id, body=event).execute()
 

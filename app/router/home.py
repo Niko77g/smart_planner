@@ -12,8 +12,8 @@ def main_page():
     <form method="post" action="/events" onsubmit="event.preventDefault(); send();">
       <input name="title" placeholder="title" />
       <input name="date" placeholder="YYYY-MM-DD" />
-      <input name="start" placeholder="HHMM (napr. 1600)" />
-      <input name="end" placeholder="HHMM (napr. 1730)" />
+      <input type="time" name="start" required />
+      <input type="time" name="end" required" />
       <button type="submit">Create</button>
     </form>
     <script>
@@ -22,8 +22,8 @@ def main_page():
       const body = {
         title: f.title.value,
         date: f.date.value,
-        start: parseInt(f.start.value),
-        end: parseInt(f.end.value)
+        start: f.start.value + ":00",
+        end: f.end.value + ":00" 
       };
       const r = await fetch('/events', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
       alert('status: ' + r.status);
