@@ -4,10 +4,12 @@ from pydantic import BaseModel
 from app.calendar import CalendarControl
 from datetime import time
 from datetime import date as date_type
+from app.predictor import StudyPredict
 
 
 router = APIRouter(prefix="/events", tags=["events"])
 calendar = CalendarControl()
+predictor = StudyPredict()
 class EventCreate(BaseModel):
     title: str
     date: date_type
@@ -21,7 +23,23 @@ class EventRead(BaseModel):
     end: str
     date: Optional[str] = None
 
+class SmartEventCreate(BaseModel):
+    subject: str
+    task_type: str
+    difficulty: int
+    pages_count: int
+    days_until_test: int
+    date: date_type
+    start: time
 
+class SmartEventResponse(BaseModel):
+    event_id: str
+    title: str
+    date: str
+    start: str
+    end: str
+    predicted_minutes: int
+    message: str
 @router.get("/", response_model=List[EventRead])
 def list_events(date_p: Optional[str] = Query(None) ):
     obj = None
@@ -79,5 +97,37 @@ def read_event(event_id: str):
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
     return event
+
+@router.post("/smart", response_model=SmartEventResponse, status_code=status.HTTP_201_CREATED, summary="Smart event")
+async def create_smart_event(data: SmartEventCreate):
+    try:
+        result = predictor.create_study_bridge(subject= data.subject,task_type=data.task_type, difficulty=data.difficulty, pages_count=data.pages_count, days_until_test=data.days_until_test, study_date=data.study_date, start_time=data.start)
+        return SmartEventResponse(event_id=result.id, title=result.title, start=result.start, end=result.end, date=result.date, predicted_minutes=result["predicted_minutes"], message=f"Na túto úlohu budeš potrebovať približne {result['predicted_minutes']} minút")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+class PredictRequest(BaseModel):
+    subject: str
+    task_type: str
+    difficulty: int
+    pages_count: int
+    days_until_test: int
+
+class PredictResponse(BaseModel):
+    predicted_minutes: int
+    message: str
+
+@router.get("/predict", response_model=PredictResponse, summary="Predict event")
+async def create_predict_event(data: PredictRequest):
+    try:
+        minutes =predictor.predict_time(subject=data.subject, task_type=data.task_type, difficulty=data.difficulty, pages_count=data.pages_count, days_until_test=data.days_until_test)
+        hours = minutes / 60
+        minutes = minutes % 60
+        formatted = f"{hours}h {minutes}min" if hours > 0 else f"{minutes}min"
+        return PredictResponse(predicted_minutes=minutes, message=formatted)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 
 
