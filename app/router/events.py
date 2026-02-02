@@ -29,8 +29,8 @@ class SmartEventCreate(BaseModel):
     difficulty: int
     pages_count: int
     days_until_test: int
-    date: date_type
-    start: time
+    study_date: date_type
+    start_time: time
 
 class SmartEventResponse(BaseModel):
     event_id: str
@@ -101,8 +101,8 @@ def read_event(event_id: str):
 @router.post("/smart", response_model=SmartEventResponse, status_code=status.HTTP_201_CREATED, summary="Smart event")
 async def create_smart_event(data: SmartEventCreate):
     try:
-        result = predictor.create_study_bridge(subject= data.subject,task_type=data.task_type, difficulty=data.difficulty, pages_count=data.pages_count, days_until_test=data.days_until_test, study_date=data.study_date, start_time=data.start)
-        return SmartEventResponse(event_id=result.id, title=result.title, start=result.start, end=result.end, date=result.date, predicted_minutes=result["predicted_minutes"], message=f"Na túto úlohu budeš potrebovať približne {result['predicted_minutes']} minút")
+        result = predictor.create_study_bridge(subject= data.subject,task_type=data.task_type, difficulty=data.difficulty, pages_count=data.pages_count, days_until_test=data.days_until_test, study_date=data.study_date, start_time=data.start_time)
+        return SmartEventResponse(event_id=result["event_id"], title=result["title"], start=result["start"], end=result["end"], date=result["date"], predicted_minutes=result["predicted_minutes"], message=f"Na túto úlohu budeš potrebovať približne {result['predicted_minutes']} minút")
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -115,16 +115,26 @@ class PredictRequest(BaseModel):
 
 class PredictResponse(BaseModel):
     predicted_minutes: int
-    message: str
+    formatted: str
+    daily_minutes: int
+    days_until_test: int
 
-@router.get("/predict", response_model=PredictResponse, summary="Predict event")
+@router.post("/predict", response_model=PredictResponse, summary="Predict event")
 async def create_predict_event(data: PredictRequest):
     try:
         minutes =predictor.predict_time(subject=data.subject, task_type=data.task_type, difficulty=data.difficulty, pages_count=data.pages_count, days_until_test=data.days_until_test)
-        hours = minutes / 60
-        minutes = minutes % 60
-        formatted = f"{hours}h {minutes}min" if hours > 0 else f"{minutes}min"
-        return PredictResponse(predicted_minutes=minutes, message=formatted)
+        hours = minutes // 60
+        mins = minutes % 60
+        formatted = f"{hours}h {mins}min" if hours > 0 else f"{mins}min"
+
+        daily = max(1, minutes // max(1, data.days_until_test))
+
+        return PredictResponse(
+            predicted_minutes=minutes,
+            formatted=formatted,
+            daily_minutes=daily,
+            days_until_test=data.days_until_test
+        )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

@@ -1,6 +1,5 @@
 from app.calendar import CalendarControl
 from datetime import datetime, timedelta, date, time
-
 import joblib
 from pathlib import Path
 
@@ -17,7 +16,12 @@ class StudyPredict:
         self.subject_encode= None
         self.task_type_encode= None
         self._load_model()
-        self.calendar = CalendarControl()
+        self._calendar = None
+    @property
+    def calendar(self):
+        if self._calendar is None:
+            self._calendar = CalendarControl()
+        return self._calendar
 
     def _load_model(self):
         if self.model_p.exists():
@@ -64,7 +68,7 @@ class StudyPredict:
         X= pd.DataFrame([{"subject": subject_encode, "task_type": task_type_encode, "difficulty": difficulty,"pages_count": pages_count,"days_until_test": days_until_test}])
 
         prediction = self.model.predict(X)[0]
-        return prediction
+        return max(15, int(round(prediction)))
 
     def create_study_bridge(self, subject: str, task_type: str, difficulty: int, pages_count: int, days_until_test: int, study_date: date,
         start_time: time):
