@@ -17,13 +17,13 @@ class StudyPredict:
         self.task_type_encode= None
         self._load_model()
         self._calendar = None
-    @property
+    @property  # getter
     def calendar(self):
         if self._calendar is None:
             self._calendar = CalendarControl()
         return self._calendar
 
-    def _load_model(self):
+    def _load_model(self): # private function
         if self.model_p.exists():
             data = joblib.load(self.model_p)
             self.model = data['model']
@@ -35,23 +35,23 @@ class StudyPredict:
             self.task_type_encode = None
             print("Error")
 
-    def train_and_save(self,training_data: list[dict]):
+    def train_and_save(self,training_data: list[dict]): # use Facade pattern
         df = pd.DataFrame(training_data)
         self.subject_encode = LabelEncoder()
         self.task_type_encode = LabelEncoder()
-        df['task_type'] = self.task_type_encode.fit_transform(df['task_type'])
+        df['task_type'] = self.task_type_encode.fit_transform(df['task_type']) # train and use
         df['subject'] = self.subject_encode.fit_transform(df['subject'])
         #Feature target
         X= df[["subject","task_type","difficulty", "pages_count","days_until_test"]]
         y= df["time_minutes"]
         #train
-        self.model = LinearRegression().fit(X,y)
+        self.model = LinearRegression().fit(X,y) # self. -> atribut
         self.model= RandomForestRegressor(n_estimators=100, random_state=42).fit(X,y)
 
-        self.model_p.parent.mkdir(parents=True, exist_ok=True)
+        self.model_p.parent.mkdir(parents=True, exist_ok=True) # created directory if doesnt exist
 
         joblib.dump({"model": self.model,"subject_encode": self.subject_encode,
-        "task_type_encode": self.task_type_encode}, self.model_p)
+        "task_type_encode": self.task_type_encode}, self.model_p) # saving model into directory
     def predict_time(self, subject: str, task_type: str, difficulty: int,pages_count: int, days_until_test: int):
         if self.model is None:
                 raise Exception("Model not loaded")
@@ -78,7 +78,7 @@ class StudyPredict:
         start_dt = datetime.combine(study_date, start_time)
         end_dt = start_dt + timedelta(minutes=predicted)
         end_time = end_dt.time()
-        title = f"📚 {subject.title()} - {task_type}"
+        title = f"{subject.title()} - {task_type}"
 
         event = self.calendar.add_event(
             title=title,

@@ -10,7 +10,7 @@ def test_load_data():
 
 def test_return_positive():
     study_predict = StudyPredict()
-    result =study_predict.predict_time(subject="matematika", task_type="pocitanie", difficulty=2, pages_count=12, days_until_test=9)
+    result =study_predict.predict_time(subject="matematika", task_type="cvicenia", difficulty=2, pages_count=12, days_until_test=9)
     assert result > 0
 
 def test_more_pages():
