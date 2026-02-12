@@ -28,9 +28,9 @@ y = df["time_minutes"]
  #split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-print("\n✂️ Data split:")
-print(f"Training samples: {len(X_train)} ({len(X_train)/len(X)*100:.0f}%)")
-print(f"Test samples:     {len(X_test)} ({len(X_test)/len(X)*100:.0f}%)")
+#print("\n Data split:")
+#print(f"Training samples: {len(X_train)} ({len(X_train)/len(X)*100:.0f}%)")
+#print(f"Test samples:     {len(X_test)} ({len(X_test)/len(X)*100:.0f}%)")
 
 class StrategyML(ABC):
     @abstractmethod

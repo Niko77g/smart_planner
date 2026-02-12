@@ -4,7 +4,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from app.predictor import StudyPredict
 from app.ml.training_data import training_data
 
-
+# train the ML model and save in the file
 def main():
     predictor = StudyPredict()
     predictor.train_and_save(training_data)

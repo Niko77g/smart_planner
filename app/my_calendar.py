@@ -1,5 +1,4 @@
 import os
-from calendar import Calendar
 from datetime import datetime, timedelta, date, time
 from typing import Optional
 from zoneinfo import ZoneInfo
@@ -20,12 +19,13 @@ class CalendarControl:
         self.time_zone = 'Europe/Bratislava' # Timezone
         self.calendar_id = "primary" # Writing to Calendar
 
-# CHATGPT -> Convert Google datetime
+#  Convert Google datetime
     def _to_rfc3339(self, d: date, t: time) -> str:
         dt = datetime.combine(d, t).replace(tzinfo=ZoneInfo(self.time_zone))
         return dt.isoformat()
-
-    def _authenticate(self):
+    @staticmethod # immutable method(indepedent)
+    def _authenticate():
+        # Launches the OAuth2 authentication flow in the default browser
         creds = None
         if os.path.exists(TOKEN_PATH):
             creds = Credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
@@ -34,7 +34,7 @@ class CalendarControl:
                 creds.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_PATH, SCOPES)
-                creds = flow.run_local_server(port=0)
+                creds = flow.run_local_server(port=8080, open_browser=False)
             with open(TOKEN_PATH, "w") as token:
                 token.write(creds.to_json())
         return build("calendar", "v3", credentials=creds)
@@ -77,7 +77,7 @@ class CalendarControl:
 
         return self.service.events().update(calendarId =self.calendar_id, eventId=event_id, body=event).execute()
 
-    def create_calendar(self, title: str) -> Calendar:
+    def create_calendar(self, title: str) -> dict:
         body = {"summary": title, "timeZone": self.time_zone
                 }
         return self.service.calendars().insert(body=body).execute()

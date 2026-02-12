@@ -1,4 +1,4 @@
-from app.calendar import CalendarControl
+from app.my_calendar import CalendarControl
 from datetime import datetime, timedelta, date, time
 import joblib
 from pathlib import Path
@@ -10,7 +10,7 @@ from sklearn.preprocessing import LabelEncoder
 
 
 class StudyPredict:
-    def __init__(self):
+    def __init__(self): #constructor (lazy loading)
         self.model_p =Path("models/model.joblib")
         self.model= None
         self.subject_encode= None
@@ -55,9 +55,9 @@ class StudyPredict:
     def predict_time(self, subject: str, task_type: str, difficulty: int,pages_count: int, days_until_test: int):
         if self.model is None:
                 raise Exception("Model not loaded")
-
+        # returns 0 if subject was not seen during training
         try:
-            subject_encode = self.subject_encode.transform([subject])[0]
+            subject_encode = self.subject_encode.transform([subject])[0] # transform -> convert from string to int, [0] first element and expected list
         except ValueError:
             subject_encode=0
 
@@ -65,21 +65,24 @@ class StudyPredict:
             task_type_encode = self.task_type_encode.transform(task_type)[0]
         except ValueError:
             task_type_encode=0
+        # Feature DataFrame for model prediction
         X= pd.DataFrame([{"subject": subject_encode, "task_type": task_type_encode, "difficulty": difficulty,"pages_count": pages_count,"days_until_test": days_until_test}])
 
         prediction = self.model.predict(X)[0]
-        return max(15, int(round(prediction)))
+        return max(15, int(round(prediction))) # min. 15 mins for predict
 
     def create_study_bridge(self, subject: str, task_type: str, difficulty: int, pages_count: int, days_until_test: int, study_date: date,
         start_time: time):
+        # get ML prediction for study time
         predicted = self.predict_time(subject=subject, task_type=task_type, difficulty= difficulty, pages_count= pages_count, days_until_test= days_until_test)
         print(predicted)
-        #count end
+        #count end time based predicted time
         start_dt = datetime.combine(study_date, start_time)
         end_dt = start_dt + timedelta(minutes=predicted)
         end_time = end_dt.time()
+        # formatting event title
         title = f"{subject.title()} - {task_type}"
-
+        # create events by Google Calendar API
         event = self.calendar.add_event(
             title=title,
             start=start_time,
