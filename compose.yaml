@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:17
+    mem_limit: 256m
+    cpus: 0.5
+    environment:
+      POSTGRES_DB: smart_planner
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5433:5432"
+
+  app:
+    build: .
+    mem_limit: 768m
+    cpus: 1.0
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://admin:admin@db:5432/smart_planner
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prihlásenie | Smart Study Planner</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="auth-body">
+    <main class="auth-shell">
+        <section class="auth-intro">
+            <a class="brand brand-light" href="/">
+                <span class="brand-mark">S</span>
+                <span>Smart Study Planner</span>
+            </a>
+            <div>
+                <span class="eyebrow eyebrow-light">Vitaj späť</span>
+                <h1>Pokračuj tam, kde si prestal.</h1>
+                <p>Prihlás sa a maj svoje študijné udalosti pokope. Google Kalendár zostáva iba voliteľným doplnkom.</p>
+            </div>
+            <div class="auth-note">
+                <strong>Lokálny základ je pripravený.</strong>
+                <span>PostgreSQL ukladá udalosti aj bez externej integrácie.</span>
+            </div>
+        </section>
+
+        <section class="auth-card">
+            <a class="back-link" href="/">← Späť na plánovač</a>
+            <span class="card-kicker">Prihlásenie</span>
+            <h2>Vitaj späť</h2>
+            <p class="muted">Zadaj svoje údaje a otvor si osobný plán.</p>
+
+            <form class="form-stack auth-form" data-auth-form="login">
+                <label>Používateľské meno
+                    <input type="text" name="username" autocomplete="username" placeholder="napr. nicolas" required>
+                </label>
+                <label>Heslo
+                    <span class="password-field">
+                        <input type="password" name="password" autocomplete="current-password" placeholder="Tvoje heslo" required>
+                        <button type="button" class="password-toggle" aria-label="Zobraziť heslo">Zobraziť</button>
+                    </span>
+                </label>
+                <div class="form-meta">
+                    <label class="simple-check"><input type="checkbox"> Zapamätať si ma</label>
+                    <a href="#">Zabudnuté heslo?</a>
+                </div>
+                <button class="button button-primary button-wide" type="submit">Prihlásiť sa</button>
+            </form>
+
+            <div class="auth-message" hidden></div>
+            <p class="auth-switch">Ešte nemáš účet? <a href="/register">Zaregistruj sa</a></p>
+        </section>
+    </main>
+    <script src="/static/auth.js"></script>
+</body>
+</html>

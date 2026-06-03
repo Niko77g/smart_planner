@@ -1,7 +1,14 @@
 from fastapi import APIRouter, Query, HTTPException, status, Depends
 from typing import List, Optional
 from pydantic import BaseModel
-from app.my_calendar import CalendarControl
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+from typing import Annotated
+from app.router.auth import get_current_user
+from app.db.models import Event, User
+from app.db.database import get_db
+from app.db.models import Event
+from app.my_calendar import CalendarControl, CalendarNotConfigure
 from datetime import time
 from datetime import date as date_type
 from app.predictor import StudyPredict
@@ -10,7 +17,7 @@ from app.predictor import StudyPredict
 router = APIRouter(prefix="/events", tags=["events"])
 
 def get_calendar() -> CalendarControl:
-    # get instance of google calendar API
+    # get instance of Google calendar API
     return CalendarControl()
 
 def get_predictor() -> StudyPredict:
@@ -24,9 +31,10 @@ class EventCreate(BaseModel):
     date: date_type
     start: time
     end: time
+    sync_to_google: bool= False
 
 class EventRead(BaseModel):
-    id: str
+    id: int
     title: str
     start: str
     end: str
@@ -67,87 +75,121 @@ class PredictResponse(BaseModel):
 # Endpoints
 
 @router.get("/", response_model=List[EventRead])
-def list_events(
+def list_events( current_user: Annotated[User, Depends(get_current_user)],
     date_p: Optional[str] = Query(None),
-    calendar: CalendarControl = Depends(get_calendar)  # Lazy
+    db: Session = Depends(get_db),
 ):
-    #List calendar events
-    obj = None
+    query = (select(Event).where(Event.user_id==current_user.id).order_by(Event.event_date, Event.start_time))
     if date_p:
         try:
-            obj = date_type.fromisoformat(date_p)
+            event_date = date_type.fromisoformat(date_p)
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid date")
+        query = query.where(Event.event_date == event_date)
 
-    items = calendar.list_events(obj)
-
-    out = []
-    for item in items:
-        start_event = item.get("start", {})
-        end_event = item.get("end", {})
-        # time vs date
-        start_v = start_event.get("dateTime") or start_event.get("date")
-        end_v = end_event.get("dateTime") or end_event.get("date")
-        if not start_v or not end_v:
-            continue
-        out.append(EventRead(
-            id=item["id"],
-            title=item.get("summary", ""),
-            start=start_v,
-            end=end_v,
-            date=item["start"].get("date")
-        ))
-    return out
+    events = db.scalars(query).all()
+    return [
+        EventRead(
+            id=event.id,
+            title=event.title,
+            start=str(event.start_time),
+            end=str(event.end_time),
+            date=str(event.event_date),
+        )
+        for event in events
+    ]
 
 
-@router.post("/", response_model=EventRead, status_code=status.HTTP_201_CREATED)
-async def create_event(
+@router.post("/", status_code=status.HTTP_201_CREATED)
+def create_event( current_user: Annotated[User, Depends(get_current_user)],
     data: EventCreate,
-    calendar: CalendarControl = Depends(get_calendar)
+    db: Session = Depends(get_db),
 ):
-    #Create a calendar event
-    try:
-        google_event = calendar.add_event(
-            title=data.title,
-            start=data.start,
-            end=data.end,
-            d=data.date
-        )
-        return EventRead(
-            id=google_event["id"],
-            title=google_event.get("summary", ""),
-            start=google_event["start"].get("dateTime", google_event["start"].get("date")),
-            end=google_event["end"].get("dateTime", google_event["end"].get("date")),
-            date=google_event["start"].get("date")
-        )
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    event = Event(
+        user_id=current_user.id,
+        title=data.title,
+        event_date=data.date,
+        start_time=data.start,
+        end_time=data.end,
+    )
+
+    db.add(event)
+    db.commit()
+    db.refresh(event)
+
+    synced = False
+    sync_message = "Udalosť bola uložená lokálne."
+
+    if data.sync_to_google:
+        try:
+            # Create event
+            calendar = CalendarControl()
+            google_event = calendar.add_event(
+                title=data.title,
+                start=data.start,
+                end=data.end,
+                d=data.date,
+            )
+
+            event.google_event_id = google_event["id"]
+            db.commit()
+
+            synced = True
+            sync_message = "Event was synced with google event."
+
+        except CalendarNotConfigure:
+            sync_message = "Event was not synced with google event."
+
+    return {
+        "id": event.id,
+        "title": event.title,
+        "synced_to_google": synced,
+        "message": sync_message,
+    }
 
 
 @router.delete("/{event_id}", status_code=204)
-def delete_event(
-    event_id: str,
-    calendar: CalendarControl = Depends(get_calendar)
+def delete_event( current_user: Annotated[User, Depends(get_current_user)],
+    event_id: int,
+    db: Session = Depends(get_db),
 ):
-    #Delete a calendar event
-    calendar.delete_event(event_id)
+    # Delete a calendar event
+    event = db.scalar(select(Event).where(Event.id == event_id, Event.user_id == current_user.id))
+    if event is None:
+        raise HTTPException(status_code=404, detail="Event not found")
+    if event.google_event_id:
+        try:
+            calendar = CalendarControl()
+            calendar.delete_event(event.google_event_id)
+        except CalendarNotConfigure:
+            pass
+    db.delete(event)
+    db.commit()
     return None
 
 
+
+
 @router.get("/search", response_model=EventRead)
-def read_event(
-    event_id: str,
-    calendar: CalendarControl = Depends(get_calendar)
+def read_event(current_user: Annotated[User, Depends(get_current_user)],
+    event_id: int,
+    db: Session = Depends(get_db),
 ):
-    #Get a single event by ID
-    event = calendar.get_event(event_id)
+    # Get a single local event by ID
+    event = db.scalar(select(Event).where(Event.id == event_id, Event.user_id == current_user.id))
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
-    return event
+    return EventRead(
+        id=event.id,
+        title=event.title,
+        start=str(event.start_time),
+        end=str(event.end_time),
+        date=str(event.event_date),
+    )
 
 
 @router.post("/smart", response_model=SmartEventResponse, status_code=status.HTTP_201_CREATED)
-async def create_smart_event(
+async def create_smart_event( current_user: Annotated[User, Depends(get_current_user)],
     data: SmartEventCreate,
     predictor: StudyPredict = Depends(get_predictor)
 ):

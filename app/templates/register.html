@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrácia | Smart Study Planner</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="auth-body">
+    <main class="auth-shell">
+        <section class="auth-intro">
+            <a class="brand brand-light" href="/">
+                <span class="brand-mark">S</span>
+                <span>Smart Study Planner</span>
+            </a>
+            <div>
+                <span class="eyebrow eyebrow-light">Začni jednoducho</span>
+                <h1>Vytvor si priestor na pokojnejšie učenie.</h1>
+                <p>Účet ti umožní oddeliť vlastné udalosti a neskôr bezpečne pripojiť Google Kalendár.</p>
+            </div>
+            <div class="auth-note">
+                <strong>Tvoje heslo nebude uložené priamo.</strong>
+                <span>Backend bude uchovávať iba bezpečný hash hesla.</span>
+            </div>
+        </section>
+
+        <section class="auth-card">
+            <a class="back-link" href="/">← Späť na plánovač</a>
+            <span class="card-kicker">Registrácia</span>
+            <h2>Vytvor si účet</h2>
+            <p class="muted">Na začiatok stačí používateľské meno a heslo.</p>
+
+            <form class="form-stack auth-form" data-auth-form="register">
+                <label>Používateľské meno
+                    <input type="text" name="username" autocomplete="username" minlength="3" placeholder="napr. nicolas" required>
+                </label>
+                <label>Heslo
+                    <span class="password-field">
+                        <input type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Minimálne 8 znakov" required>
+                        <button type="button" class="password-toggle" aria-label="Zobraziť heslo">Zobraziť</button>
+                    </span>
+                </label>
+                <label>Potvrdenie hesla
+                    <span class="password-field">
+                        <input type="password" name="password_confirm" autocomplete="new-password" minlength="8" placeholder="Zopakuj heslo" required>
+                        <button type="button" class="password-toggle" aria-label="Zobraziť heslo">Zobraziť</button>
+                    </span>
+                </label>
+                <label class="simple-check">
+                    <input type="checkbox" required>
+                    Súhlasím s vytvorením lokálneho účtu.
+                </label>
+                <button class="button button-primary button-wide" type="submit">Vytvoriť účet</button>
+            </form>
+
+            <div class="auth-message" hidden></div>
+            <p class="auth-switch">Už účet máš? <a href="/login">Prihlás sa</a></p>
+        </section>
+    </main>
+    <script src="/static/auth.js"></script>
+</body>
+</html>

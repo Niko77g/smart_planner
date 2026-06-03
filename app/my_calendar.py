@@ -13,6 +13,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CREDENTIALS_PATH = os.path.join(BASE_DIR, "credentials", "credentials.json")
 TOKEN_PATH = os.path.join(BASE_DIR, "token.json")
 
+class CalendarNotConfigure(Exception):
+    pass
 class CalendarControl:
     def __init__(self):
         self.service = self._authenticate() # Service active to Google Calendar API
@@ -26,7 +28,11 @@ class CalendarControl:
     @staticmethod # immutable method(indepedent)
     def _authenticate():
         # Launches the OAuth2 authentication flow in the default browser
+        if not os.path.exists(CREDENTIALS_PATH):
+            raise CalendarNotConfigure("Credentials not configured")
         creds = None
+        if not os.path.exists(TOKEN_PATH):
+            raise CalendarNotConfigure("Token not configured")
         if os.path.exists(TOKEN_PATH):
             creds = Credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
         if not creds or not creds.valid:
