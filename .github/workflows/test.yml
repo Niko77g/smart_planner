@@ -37,6 +37,10 @@ jobs:
           cache: "pip"
       - run: pip install --upgrade pip
       - run: pip install -r requirements.txt
+      - name: Install PostgresSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Initialize db
+        run: PGPASSWORD=admin psql -h localhost -U admin -d smart_planner -f database/init.sql
       - run: pytest
       - run: docker build -t smart-planner .
 
