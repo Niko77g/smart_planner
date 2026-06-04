@@ -16,7 +16,7 @@ ALGORITHM = "HS256"
 router = APIRouter(prefix="/auth", tags=["auth"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 password_hash = PasswordHash.recommended()
-
+#pydentic (ako ma vyzerat JSON)
 class Auth(BaseModel):
     id: int
     username: str
