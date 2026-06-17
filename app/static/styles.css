@@ -20,6 +20,10 @@
     box-sizing: border-box;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 html {
     scroll-behavior: smooth;
 }
@@ -96,6 +100,11 @@ select {
     gap: 10px;
 }
 
+.header-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
 .guest-actions,
 .user-actions {
     display: inline-flex;
@@ -150,6 +159,13 @@ select {
 
 .button:hover {
     transform: translateY(-2px);
+}
+
+.button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 3px solid rgba(47, 111, 98, 0.22);
+    outline-offset: 3px;
 }
 
 .button-primary {

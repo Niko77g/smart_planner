@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="sk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prihlásenie | Smart Study Planner</title>
+    <title>Login | Smart Study Planner</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body class="auth-body">
@@ -14,41 +14,41 @@
                 <span>Smart Study Planner</span>
             </a>
             <div>
-                <span class="eyebrow eyebrow-light">Vitaj späť</span>
-                <h1>Pokračuj tam, kde si prestal.</h1>
-                <p>Prihlás sa a maj svoje študijné udalosti pokope. Google Kalendár zostáva iba voliteľným doplnkom.</p>
+                <span class="eyebrow eyebrow-light">Welcome back</span>
+                <h1>Continue where you left off.</h1>
+                <p>Log in to keep your study events in one place. Google Calendar stays optional.</p>
             </div>
             <div class="auth-note">
-                <strong>Lokálny základ je pripravený.</strong>
-                <span>PostgreSQL ukladá udalosti aj bez externej integrácie.</span>
+                <strong>The local setup is ready.</strong>
+                <span>PostgreSQL stores your events even without external integration.</span>
             </div>
         </section>
 
         <section class="auth-card">
-            <a class="back-link" href="/">← Späť na plánovač</a>
-            <span class="card-kicker">Prihlásenie</span>
-            <h2>Vitaj späť</h2>
-            <p class="muted">Zadaj svoje údaje a otvor si osobný plán.</p>
+            <a class="back-link" href="/">← Back to planner</a>
+            <span class="card-kicker">Login</span>
+            <h2>Welcome back</h2>
+            <p class="muted">Enter your credentials to open your personal plan.</p>
 
             <form class="form-stack auth-form" data-auth-form="login">
-                <label>Používateľské meno
-                    <input type="text" name="username" autocomplete="username" placeholder="napr. nicolas" required>
+                <label>Username
+                    <input type="text" name="username" autocomplete="username" placeholder="example: nicolas" required>
                 </label>
-                <label>Heslo
+                <label>Password
                     <span class="password-field">
-                        <input type="password" name="password" autocomplete="current-password" placeholder="Tvoje heslo" required>
-                        <button type="button" class="password-toggle" aria-label="Zobraziť heslo">Zobraziť</button>
+                        <input type="password" name="password" autocomplete="current-password" placeholder="Your password" required>
+                        <button type="button" class="password-toggle" aria-label="Show password">Show</button>
                     </span>
                 </label>
                 <div class="form-meta">
-                    <label class="simple-check"><input type="checkbox"> Zapamätať si ma</label>
-                    <a href="#">Zabudnuté heslo?</a>
+                    <label class="simple-check"><input type="checkbox"> Remember me</label>
+                    <a href="#">Forgot password?</a>
                 </div>
-                <button class="button button-primary button-wide" type="submit">Prihlásiť sa</button>
+                <button class="button button-primary button-wide" type="submit">Log in</button>
             </form>
 
             <div class="auth-message" hidden></div>
-            <p class="auth-switch">Ešte nemáš účet? <a href="/register">Zaregistruj sa</a></p>
+            <p class="auth-switch">Do not have an account yet? <a href="/register">Create one</a></p>
         </section>
     </main>
     <script src="/static/auth.js"></script>

@@ -62,7 +62,7 @@ class StudyPredict:
             subject_encode=0
 
         try:
-            task_type_encode = self.task_type_encode.transform(task_type)[0]
+            task_type_encode = self.task_type_encode.transform([task_type])[0]
         except ValueError:
             task_type_encode=0
         # Feature DataFrame for model prediction

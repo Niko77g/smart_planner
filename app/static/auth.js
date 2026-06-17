@@ -3,16 +3,16 @@ document.querySelectorAll(".password-toggle").forEach((button) => {
         const input = button.parentElement.querySelector("input");
         const showPassword = input.type === "password";
         input.type = showPassword ? "text" : "password";
-        button.textContent = showPassword ? "Skryť" : "Zobraziť";
+        button.textContent = showPassword ? "Hide" : "Show";
     });
 });
 
 async function readError(response) {
     try {
         const payload = await response.json();
-        return payload.detail || "Operáciu sa nepodarilo dokončiť.";
+        return payload.detail || "The operation could not be completed.";
     } catch {
-        return "Operáciu sa nepodarilo dokončiť.";
+        return "The operation could not be completed.";
     }
 }
 
@@ -45,7 +45,7 @@ document.querySelector(".auth-form").addEventListener("submit", async (event) =>
 
     if (form.dataset.authForm === "register") {
         if (form.password.value !== form.password_confirm.value) {
-            showMessage(message, "error", "Heslá sa nezhodujú.");
+            showMessage(message, "error", "Passwords do not match.");
             return;
         }
     }

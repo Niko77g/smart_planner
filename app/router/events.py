@@ -1,18 +1,19 @@
-from fastapi import APIRouter, Query, HTTPException, status, Depends
+from datetime import date as date_type
+from datetime import datetime, time, timedelta
+from typing import Annotated
 from typing import List, Optional
+from math import ceil
+from fastapi import APIRouter, Query, HTTPException, status, Depends
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from typing import Annotated
-from app.router.auth import get_current_user
-from app.db.models import Event, User
+
 from app.db.database import get_db
 from app.db.models import Event
+from app.db.models import User
 from app.my_calendar import CalendarControl, CalendarNotConfigure
-from datetime import time
-from datetime import date as date_type
 from app.predictor import StudyPredict
-
+from app.router.auth import get_current_user
 
 router = APIRouter(prefix="/events", tags=["events"])
 
@@ -26,6 +27,17 @@ def get_predictor() -> StudyPredict:
 
 
 # Pydantic models
+class StudyPlan(BaseModel):
+    subject: str
+    title: str
+    task_type: str
+    pages_count: int
+    difficulty: int
+    start_date: date_type
+    test_date: date_type
+    preferred_start_time: time
+    max_minutes_per_day: int = 45
+
 class EventCreate(BaseModel):
     title: str
     date: date_type
@@ -70,8 +82,19 @@ class PredictResponse(BaseModel):
     formatted: str
     daily_minutes: int
     days_until_test: int
+class StudyPlanBlock(BaseModel):
+    id: int
+    title: str
+    date: str
+    start_time: str
+    end_time: str
+    minutes: int
 
-
+class StudyPlanResponse(BaseModel):
+    total_minutes: int
+    block_count: int
+    blocks: list[StudyPlanBlock]
+    message: str
 # Endpoints
 
 @router.get("/", response_model=List[EventRead])
@@ -244,3 +267,77 @@ async def create_predict_event(
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/study_plan", response_model=StudyPlanResponse, status_code=status.HTTP_201_CREATED)
+def create_study_plan(current_user: Annotated[User, Depends(get_current_user)],
+    data: StudyPlan,
+    db: Session = Depends(get_db), predictor: StudyPredict = Depends(get_predictor)):
+
+    if data.max_minutes_per_day<=0:
+        raise HTTPException(status_code=400, detail="Max minutes per day must be greater than 0")
+    if data.start_date >= data.test_date:
+        raise HTTPException(status_code=400, detail="Start date must be before test date")
+    days_until_test = (data.test_date - data.start_date).days
+    total_minutes = predictor.predict_time(subject=data.subject, task_type=data.task_type,difficulty=data.difficulty, pages_count=data.pages_count, days_until_test=days_until_test)
+    result = split_into_study_blocks(total_minutes=total_minutes,start_date=data.start_date,test_date=data.test_date,preferred_start=data.preferred_start_time,max_minutes_per_day=data.max_minutes_per_day)
+    scheduled_minutes = sum(block["minutes"] for block in result["blocks"])
+    if scheduled_minutes < total_minutes:
+        raise HTTPException(status_code=400, detail="Not enough days before test date to schedule all study minutes")
+
+    created_events = []
+    for block in result["blocks"]:
+        event= Event(
+            user_id=current_user.id,
+            title=data.title,
+            event_date=block["date"],
+            start_time=block["start"],
+            end_time=block["end"],
+            predicted_minutes=block["minutes"],
+        )
+        db.add(event)
+        created_events.append((event, block))
+    db.commit()
+    response_blocks = []
+    for event, block in created_events:
+        db.refresh(event)
+        response_blocks.append(StudyPlanBlock(
+            id=event.id,
+            title=event.title,
+            date=str(event.event_date),
+            start_time=str(event.start_time),
+            end_time=str(event.end_time),
+            minutes=block["minutes"],
+        ))
+
+    return StudyPlanResponse(
+        total_minutes=result["total_minutes"],
+        block_count=len(response_blocks),
+        blocks=response_blocks,
+        message="Study plan was created.",
+    )
+
+def split_into_study_blocks(total_minutes, start_date, test_date, preferred_start, max_minutes_per_day):
+    available_d = (test_date - start_date).days
+    block_count = ceil(total_minutes/ max_minutes_per_day)
+    block_count = min(available_d, block_count)
+    base_minute = total_minutes // block_count
+    extra = total_minutes % block_count
+    spacing = available_d / block_count
+    blocks = []
+    for i in range(block_count):
+        block_m= base_minute
+        if i < extra:
+            block_m+= 1
+        day_off= int(i * spacing)
+        cur_date = start_date+timedelta(days=day_off)
+        start_d= datetime.combine(cur_date, preferred_start)
+        end_d= start_d + timedelta(minutes=block_m)
+
+        blocks.append({
+            "date": cur_date,
+            "start": start_d.time(),
+            "end": end_d.time(),
+            "minutes": block_m,
+        })
+
+    return {"total_minutes": total_minutes,"block_count": len(blocks), "blocks": blocks}

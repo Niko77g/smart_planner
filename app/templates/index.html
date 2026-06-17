@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,14 +13,14 @@
             <span>Smart Study Planner</span>
         </a>
         <nav class="header-actions">
-            <span class="status-pill"><span class="status-dot"></span> Lokálny režim</span>
+            <span class="status-pill"><span class="status-dot"></span> Local mode</span>
             <span class="guest-actions" data-guest-actions>
-                <a class="button button-ghost button-small" href="/login">Prihlásiť sa</a>
-                <a class="button button-primary button-small" href="/register">Vytvoriť účet</a>
+                <a class="button button-ghost button-small" href="/login">Log in</a>
+                <a class="button button-primary button-small" href="/register">Create account</a>
             </span>
             <span class="user-actions" data-user-actions hidden>
                 <span class="user-chip" data-current-user></span>
-                <button class="button button-ghost button-small" id="logoutButton" type="button">Odhlásiť sa</button>
+                <button class="button button-ghost button-small" id="logoutButton" type="button">Log out</button>
             </span>
         </nav>
     </header>
@@ -28,24 +28,24 @@
     <main class="page-shell">
         <section class="hero">
             <div>
-                <span class="eyebrow">Študuj s plánom, nie pod stresom</span>
-                <h1>Rozdeľ si učenie na zvládnuteľné kroky.</h1>
+                <span class="eyebrow">Study with a plan, not pressure</span>
+                <h1>Turn study goals into focused calendar blocks.</h1>
                 <p class="hero-copy">
-                    Odhadni potrebný čas pomocou ML modelu, ulož si študijné bloky lokálne
-                    a Google Kalendár pripoj až vtedy, keď ho budeš chcieť používať.
+                    Estimate study time with a small ML model, save your study blocks locally,
+                    and connect Google Calendar only when you need synchronization.
                 </p>
                 <div class="hero-actions">
-                    <a class="button button-primary" href="#prediction">Vypočítať čas</a>
-                    <a class="button button-secondary" href="#events">Moje udalosti</a>
+                    <a class="button button-primary" href="#prediction">Estimate time</a>
+                    <a class="button button-secondary" href="#events">View events</a>
                 </div>
             </div>
             <aside class="hero-panel">
-                <p class="panel-label">Dnešný fokus</p>
+                <p class="panel-label">Today’s focus</p>
                 <div class="focus-time">45 <span>min</span></div>
-                <p class="focus-copy">Jeden pokojný blok učenia je lepší než večerný maratón.</p>
+                <p class="focus-copy">One focused block is easier to finish than a late-night marathon.</p>
                 <div class="progress-track"><span></span></div>
                 <div class="panel-footer">
-                    <span>Lokálna DB pripravená</span>
+                    <span>Local DB ready</span>
                     <strong>PostgreSQL</strong>
                 </div>
             </aside>
@@ -54,130 +54,223 @@
         <section class="feature-strip">
             <article>
                 <span class="feature-icon">01</span>
-                <div><strong>ML odhad</strong><small>Praktický časový plán</small></div>
+                <div><strong>ML estimate</strong><small>Task-based time prediction</small></div>
             </article>
             <article>
                 <span class="feature-icon">02</span>
-                <div><strong>Lokálne udalosti</strong><small>Fungujú aj bez Googlu</small></div>
+                <div><strong>Local events</strong><small>Works without Google</small></div>
             </article>
             <article>
                 <span class="feature-icon">03</span>
-                <div><strong>Voliteľný sync</strong><small>Google pripojíš neskôr</small></div>
+                <div><strong>Optional sync</strong><small>Connect Google later</small></div>
             </article>
         </section>
 
         <section class="section-heading" id="prediction">
             <div>
-                <span class="eyebrow">Plánovanie</span>
-                <h2>Koľko času si máš vyhradiť?</h2>
+                <span class="eyebrow">Planning</span>
+                <h2>How much time should you reserve?</h2>
             </div>
-            <p>Vyplň základné údaje a model pripraví realistický odhad.</p>
+            <p>Enter the task details and the model will estimate a practical study duration.</p>
         </section>
 
         <section class="content-grid">
             <article class="card card-large">
                 <div class="card-header">
-                    <span class="card-kicker">ML predikcia</span>
-                    <h3>Odhad času na učenie</h3>
-                    <p>Táto funkcia nepotrebuje Google Calendar ani prihlásenie.</p>
+                    <span class="card-kicker">ML prediction</span>
+                    <h3>Study time estimate</h3>
+                    <p>This feature does not require Google Calendar or login.</p>
                 </div>
                 <form id="predictForm" class="form-stack">
                     <div class="form-grid">
-                        <label>Predmet
+                        <label>Subject
                             <select name="subject" required>
-                                <option value="">Vyber predmet</option>
-                                <option value="matematika">Matematika</option>
-                                <option value="fyzika">Fyzika</option>
-                                <option value="chemia">Chémia</option>
-                                <option value="biologia">Biológia</option>
-                                <option value="dejepis">Dejepis</option>
-                                <option value="anglictina">Angličtina</option>
-                                <option value="informatika">Informatika</option>
-                                <option value="slovensky jazyk">Slovenský jazyk</option>
-                                <option value="geografia">Geografia</option>
+                                <option value="">Choose subject</option>
+                                <option value="matematika">Mathematics</option>
+                                <option value="fyzika">Physics</option>
+                                <option value="chemia">Chemistry</option>
+                                <option value="biologia">Biology</option>
+                                <option value="dejepis">History</option>
+                                <option value="anglictina">English</option>
+                                <option value="informatika">Computer science</option>
+                                <option value="slovensky jazyk">Slovak language</option>
+                                <option value="geografia">Geography</option>
                             </select>
                         </label>
-                        <label>Typ úlohy
+                        <label>Task type
                             <select name="task_type" required>
-                                <option value="">Vyber typ</option>
-                                <option value="citanie">Čítanie a teória</option>
-                                <option value="cvicenia">Cvičenia a príklady</option>
-                                <option value="opakovanie">Opakovanie</option>
-                                <option value="pisanie">Písanie</option>
-                                <option value="programovanie">Programovanie</option>
-                                <option value="projekt">Projekt</option>
+                                <option value="">Choose type</option>
+                                <option value="citanie">Reading and theory</option>
+                                <option value="cvicenia">Exercises and examples</option>
+                                <option value="opakovanie">Review</option>
+                                <option value="pisanie">Writing</option>
+                                <option value="programovanie">Programming</option>
+                                <option value="projekt">Project</option>
                             </select>
                         </label>
-                        <label>Obtiažnosť
+                        <label>Difficulty
                             <select name="difficulty" required>
-                                <option value="1">1 - veľmi ľahké</option>
-                                <option value="2">2 - ľahké</option>
-                                <option value="3" selected>3 - stredné</option>
-                                <option value="4">4 - náročné</option>
-                                <option value="5">5 - veľmi náročné</option>
+                                <option value="1">1 - very easy</option>
+                                <option value="2">2 - easy</option>
+                                <option value="3" selected>3 - medium</option>
+                                <option value="4">4 - hard</option>
+                                <option value="5">5 - very hard</option>
                             </select>
                         </label>
-                        <label>Počet strán
+                        <label>Page count
                             <input type="number" name="pages_count" min="1" max="500" value="10" required>
                         </label>
                     </div>
-                    <label>Dní do testu
+                    <label>Days until test
                         <input type="number" name="days_until_test" min="1" max="365" value="7" required>
                     </label>
-                    <button class="button button-primary button-wide" type="submit">Vypočítať odhad</button>
+                    <button class="button button-primary button-wide" type="submit">Calculate estimate</button>
                 </form>
                 <div id="predictResult" class="result-panel" hidden></div>
             </article>
 
             <aside class="card insight-card">
-                <span class="card-kicker">Ako to funguje</span>
-                <h3>Malé rozhodnutia, lepší prehľad.</h3>
-                <p>Model vyhodnotí predmet, typ úlohy, náročnosť, rozsah a zostávajúci čas.</p>
+                <span class="card-kicker">How it works</span>
+                <h3>Small inputs, clearer planning.</h3>
+                <p>The model evaluates subject, task type, difficulty, scope, and remaining time.</p>
                 <ul class="check-list">
-                    <li>Výsledok dostaneš v minútach.</li>
-                    <li>Uvidíš odporúčaný denný blok.</li>
-                    <li>Predikcia funguje úplne lokálne.</li>
+                    <li>You get the estimate in minutes.</li>
+                    <li>You see a suggested daily study load.</li>
+                    <li>The prediction runs locally.</li>
+                </ul>
+            </aside>
+        </section>
+
+        <section class="section-heading">
+            <div>
+                <span class="eyebrow">Automatic plan</span>
+                <h2>Generate a study plan.</h2>
+            </div>
+            <p>Enter the study details and the app will estimate the time, then split it into smaller blocks before the test.</p>
+        </section>
+
+        <section class="content-grid">
+            <article class="card card-large">
+                <div class="card-header">
+                    <span class="card-kicker">Study Plan Generator</span>
+                    <h3>Split study time across days</h3>
+                    <p>This feature requires login because created blocks are stored in your database.</p>
+                </div>
+                <form id="studyPlanForm" class="form-stack">
+                    <label>Plan title
+                        <input type="text" name="title" placeholder="Example: Derivatives exam prep" required>
+                    </label>
+                    <div class="form-grid">
+                        <label>Subject
+                            <select name="subject" required>
+                                <option value="">Choose subject</option>
+                                <option value="matematika">Mathematics</option>
+                                <option value="fyzika">Physics</option>
+                                <option value="chemia">Chemistry</option>
+                                <option value="biologia">Biology</option>
+                                <option value="dejepis">History</option>
+                                <option value="anglictina">English</option>
+                                <option value="informatika">Computer science</option>
+                                <option value="slovensky jazyk">Slovak language</option>
+                                <option value="geografia">Geography</option>
+                            </select>
+                        </label>
+                        <label>Task type
+                            <select name="task_type" required>
+                                <option value="">Choose type</option>
+                                <option value="citanie">Reading and theory</option>
+                                <option value="cvicenia">Exercises and examples</option>
+                                <option value="opakovanie">Review</option>
+                                <option value="pisanie">Writing</option>
+                                <option value="programovanie">Programming</option>
+                                <option value="projekt">Project</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="form-grid">
+                        <label>Difficulty
+                            <select name="difficulty" required>
+                                <option value="1">1 - very easy</option>
+                                <option value="2">2 - easy</option>
+                                <option value="3" selected>3 - medium</option>
+                                <option value="4">4 - hard</option>
+                                <option value="5">5 - very hard</option>
+                            </select>
+                        </label>
+                        <label>Page count
+                            <input type="number" name="pages_count" min="1" max="500" value="10" required>
+                        </label>
+                    </div>
+                    <div class="form-grid">
+                        <label>Max minutes per day
+                            <input type="number" name="max_minutes_per_day" min="1" max="240" value="45" required>
+                        </label>
+                    </div>
+                    <div class="form-grid">
+                        <label>Start date
+                            <input type="date" name="start_date" required>
+                        </label>
+                        <label>Test date
+                            <input type="date" name="test_date" required>
+                        </label>
+                    </div>
+                    <label>Preferred start time
+                        <input type="time" name="preferred_start_time" value="16:00" required>
+                    </label>
+                    <button class="button button-primary button-wide" type="submit">Generate plan</button>
+                </form>
+                <div id="studyPlanResult" class="result-panel" hidden></div>
+            </article>
+
+            <aside class="card insight-card">
+                <span class="card-kicker">What gets saved</span>
+                <h3>Each block becomes a separate event.</h3>
+                <p>The backend splits the estimated minutes by your daily limit and stores each block in the events table.</p>
+                <ul class="check-list">
+                    <li>Each block has its own date.</li>
+                    <li>The start time follows your preferred time.</li>
+                    <li>The block length is saved in predicted_minutes.</li>
                 </ul>
             </aside>
         </section>
 
         <section class="section-heading" id="events">
             <div>
-                <span class="eyebrow">Kalendár</span>
-                <h2>Naplánuj si konkrétny blok.</h2>
+                <span class="eyebrow">Calendar</span>
+                <h2>Schedule a specific block.</h2>
             </div>
-            <p>Udalosti sa ukladajú do PostgreSQL. Google synchronizácia je voliteľná.</p>
+            <p>Events are stored in PostgreSQL. Google synchronization is optional.</p>
         </section>
 
         <section class="content-grid">
             <article class="card">
                 <div class="card-header">
-                    <span class="card-kicker">Nová udalosť</span>
-                    <h3>Pridať študijný blok</h3>
+                    <span class="card-kicker">New event</span>
+                    <h3>Add a study block</h3>
                 </div>
                 <form id="manualForm" class="form-stack">
-                    <label>Názov udalosti
-                        <input type="text" name="title" placeholder="Napr. Opakovanie matematiky" required>
+                    <label>Event title
+                        <input type="text" name="title" placeholder="Example: Math review" required>
                     </label>
-                    <label>Dátum
+                    <label>Date
                         <input type="date" name="date" required>
                     </label>
                     <div class="form-grid">
-                        <label>Začiatok
+                        <label>Start
                             <input type="time" name="start" value="16:00" required>
                         </label>
-                        <label>Koniec
+                        <label>End
                             <input type="time" name="end" value="17:00" required>
                         </label>
                     </div>
                     <label class="checkbox-row">
                         <input type="checkbox" name="sync_to_google">
                         <span>
-                            <strong>Synchronizovať s Google Calendar</strong>
-                            <small>Voliteľné. Vyžaduje nakonfigurovanú Google integráciu.</small>
+                            <strong>Sync with Google Calendar</strong>
+                            <small>Optional. Requires configured Google integration.</small>
                         </span>
                     </label>
-                    <button class="button button-primary button-wide" type="submit">Uložiť udalosť</button>
+                    <button class="button button-primary button-wide" type="submit">Save event</button>
                 </form>
                 <div id="manualResult" class="result-panel" hidden></div>
             </article>
@@ -185,13 +278,13 @@
             <article class="card">
                 <div class="card-header card-header-row">
                     <div>
-                        <span class="card-kicker">Lokálna databáza</span>
-                        <h3>Tvoje udalosti</h3>
+                        <span class="card-kicker">Local database</span>
+                        <h3>Your events</h3>
                     </div>
-                    <button class="button button-secondary button-small" id="reloadEvents" type="button">Obnoviť</button>
+                    <button class="button button-secondary button-small" id="reloadEvents" type="button">Refresh</button>
                 </div>
                 <div id="eventsList" class="events-list">
-                    <p class="empty-state">Načítavam udalosti...</p>
+                    <p class="empty-state">Loading events...</p>
                 </div>
             </article>
         </section>
@@ -199,7 +292,7 @@
 
     <footer class="site-footer">
         <span>Smart Study Planner</span>
-        <span>Lokálny vývojový režim</span>
+        <span>Local development mode</span>
     </footer>
 
     <script src="/static/app.js"></script>
